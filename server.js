@@ -7,20 +7,20 @@ app.get("/users", function (req, res) {
   res.send(users);
 });
 
-app.post("/login", (req, res) => {
+const checkUser = (req, res, next) => {
   const body = req.body;
   const id = body.id;
-  console.log(id);
-  console.log(users);
   const usersid = users.find((user) => {
     return user.id === Number(id);
   });
-
   if (usersid) {
-    res.send(usersid);
-  } else {
-    res.send({ message: "user not found" });
+    return res.send(usersid);
   }
+  next();
+};
+
+app.post("/login", checkUser, (req, res) => {
+  res.send({ message: "user not found" });
 });
 
 app.post("/signUp", (req, res) => {
@@ -45,11 +45,12 @@ app.delete("/deleteUser", (req, res) => {
   const deletingUser = users.find((user) => {
     return user.id === Number(id);
   });
+  userAdding.shift(deletingUser);
 
   if (deletingUser) {
     res.send({ message: "user deleted" });
   } else {
-    res.send({ message: "user is not delete" });
+    res.send({ message: "user not found" });
   }
 });
 
